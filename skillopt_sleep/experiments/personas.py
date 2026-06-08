@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import List
 
-from skillopt.sleep.types import TaskRecord
+from skillopt_sleep.types import TaskRecord
 
 
 def _t(i, intent, ref, rule, project="/personas/demo", outcome="fail") -> TaskRecord:

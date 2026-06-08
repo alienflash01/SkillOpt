@@ -18,7 +18,7 @@ import hashlib
 import re
 from typing import Any, Callable, List, Optional
 
-from skillopt.sleep.types import SessionDigest, TaskRecord
+from skillopt_sleep.types import SessionDigest, TaskRecord
 
 
 def _tid(project: str, intent: str) -> str:

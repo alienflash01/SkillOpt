@@ -13,9 +13,9 @@ Held-out scoring is done locally by the rule judge (no judge API). Only the
 agent's `attempt` (and the optimizer's `reflect`) spend tokens.
 
 Usage:
-    python -m skillopt.sleep.experiments.run_gbrain --backend mock
-    python -m skillopt.sleep.experiments.run_gbrain --backend claude --seeds brief-writer --nights 2
-    python -m skillopt.sleep.experiments.run_gbrain --backend codex  --data-root /tmp/gbrain-evals/eval/data/skillopt-v1
+    python -m skillopt_sleep.experiments.run_gbrain --backend mock
+    python -m skillopt_sleep.experiments.run_gbrain --backend claude --seeds brief-writer --nights 2
+    python -m skillopt_sleep.experiments.run_gbrain --backend codex  --data-root /tmp/gbrain-evals/eval/data/skillopt-v1
 """
 from __future__ import annotations
 
@@ -24,14 +24,14 @@ import json
 import sys
 from typing import Dict, List, Optional
 
-from skillopt.sleep.backend import build_backend, get_backend
-from skillopt.sleep.consolidate import consolidate, select_gate_score
-from skillopt.sleep.experiments.gbrain_bench import (
+from skillopt_sleep.backend import build_backend, get_backend
+from skillopt_sleep.consolidate import consolidate, select_gate_score
+from skillopt_sleep.experiments.gbrain_bench import (
     available_seeds,
     find_data_root,
     load_seed,
 )
-from skillopt.sleep.replay import aggregate_scores, replay_batch
+from skillopt_sleep.replay import aggregate_scores, replay_batch
 
 
 def _score(backend, tasks, skill, memory, split="test", metric="mixed", w=0.5):
@@ -95,7 +95,7 @@ def run_seed(backend, seed: str, skill: str, tasks: List, *,
     slow_text = None
     if nights >= 2 and slow_update:
         try:
-            from skillopt.sleep.slow_update import run_slow_update, replace_slow_field
+            from skillopt_sleep.slow_update import run_slow_update, replace_slow_field
             val_tasks = [t for t in tasks if t.split == "val"] or tasks
             prev_pairs = replay_batch(backend, val_tasks, first_night_skill, memory)
             curr_pairs = replay_batch(backend, val_tasks, cur, memory)
@@ -170,7 +170,7 @@ def main(argv=None) -> int:
         # budget auto-planning: derive nights x rollouts_k from a token budget
         nights, rollouts_k = args.nights, args.rollouts_k
         if args.budget_tokens:
-            from skillopt.sleep.budget import Budget, plan_depth
+            from skillopt_sleep.budget import Budget, plan_depth
             n_train = len([t for t in tasks if t.split == "train"]) or len(tasks)
             nights, rollouts_k = plan_depth(
                 Budget(max_tokens=args.budget_tokens), n_tasks=n_train,

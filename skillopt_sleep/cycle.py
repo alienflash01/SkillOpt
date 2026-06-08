@@ -14,15 +14,15 @@ import time
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from skillopt.sleep.backend import get_backend
-from skillopt.sleep.config import SleepConfig, load_config
-from skillopt.sleep.consolidate import consolidate
-from skillopt.sleep.harvest import harvest
-from skillopt.sleep.memory import ensure_skill_scaffold
-from skillopt.sleep.mine import mine
-from skillopt.sleep.state import SleepState, _now_iso
-from skillopt.sleep.staging import write_staging, adopt as adopt_staging
-from skillopt.sleep.types import SessionDigest, SleepReport, TaskRecord
+from skillopt_sleep.backend import get_backend
+from skillopt_sleep.config import SleepConfig, load_config
+from skillopt_sleep.consolidate import consolidate
+from skillopt_sleep.harvest import harvest
+from skillopt_sleep.memory import ensure_skill_scaffold
+from skillopt_sleep.mine import mine
+from skillopt_sleep.state import SleepState, _now_iso
+from skillopt_sleep.staging import write_staging, adopt as adopt_staging
+from skillopt_sleep.types import SessionDigest, SleepReport, TaskRecord
 
 
 @dataclass
@@ -131,7 +131,7 @@ def run_sleep_cycle(
         llm_miner = None
         if cfg.get("backend", "mock") != "mock" and cfg.get("llm_mine", True):
             try:
-                from skillopt.sleep.llm_miner import make_llm_miner
+                from skillopt_sleep.llm_miner import make_llm_miner
                 llm_miner = make_llm_miner(backend, max_tasks=cfg.get("max_tasks_per_night", 40))
             except Exception:
                 llm_miner = None

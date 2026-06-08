@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# SkillOpt-Sleep runner — invokes the skillopt.sleep engine with a suitable
+# SkillOpt-Sleep runner — invokes the skillopt_sleep engine with a suitable
 # Python interpreter, from the repo that contains this plugin.
 #
 # Usage: sleep.sh <run|dry-run|status|adopt|harvest> [extra args...]
 set -euo pipefail
 
 # Resolve the repo root: the plugin lives at <repo>/skillopt-sleep-plugin,
-# so the engine package is at <repo>/skillopt/sleep. CLAUDE_PLUGIN_ROOT points
+# so the engine package is at <repo>/skillopt_sleep. CLAUDE_PLUGIN_ROOT points
 # at the plugin dir when run by Claude Code; fall back to this script's dir.
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 REPO_ROOT="$(cd "$PLUGIN_ROOT/.." && pwd)"
@@ -27,4 +27,4 @@ fi
 if [ "$#" -eq 0 ]; then set -- status; fi
 
 cd "$REPO_ROOT"
-exec "$PY" -m skillopt.sleep "$@"
+exec "$PY" -m skillopt_sleep "$@"

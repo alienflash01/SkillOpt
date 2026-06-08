@@ -14,9 +14,9 @@ What it proves:
      the adopted artifact, re-scored, retains the lift.
 
 Run:
-    python -m skillopt.sleep.experiments.run_experiment
-    python -m skillopt.sleep.experiments.run_experiment --persona programmer --nights 3
-    python -m skillopt.sleep.experiments.run_experiment --backend anthropic   # real lift
+    python -m skillopt_sleep.experiments.run_experiment
+    python -m skillopt_sleep.experiments.run_experiment --persona programmer --nights 3
+    python -m skillopt_sleep.experiments.run_experiment --backend anthropic   # real lift
 """
 from __future__ import annotations
 
@@ -27,21 +27,21 @@ import sys
 import tempfile
 from typing import List
 
-from skillopt.sleep.backend import get_backend
-from skillopt.sleep.consolidate import consolidate
-from skillopt.sleep.experiments.personas import (
+from skillopt_sleep.backend import get_backend
+from skillopt_sleep.consolidate import consolidate
+from skillopt_sleep.experiments.personas import (
     PERSONAS,
     harmful_edit_task,
     researcher_persona,
 )
-from skillopt.sleep.memory import ensure_skill_scaffold
-from skillopt.sleep.replay import aggregate_scores, replay_batch
-from skillopt.sleep.types import TaskRecord
+from skillopt_sleep.memory import ensure_skill_scaffold
+from skillopt_sleep.replay import aggregate_scores, replay_batch
+from skillopt_sleep.types import TaskRecord
 
 
 def _score_holdout(backend, tasks: List[TaskRecord], skill: str, memory: str,
                    metric: str = "mixed", w: float = 0.5) -> float:
-    from skillopt.sleep.consolidate import select_gate_score
+    from skillopt_sleep.consolidate import select_gate_score
     # the persona experiment uses a 2-way split (train/val, no test); score on val
     holdout = [t for t in tasks if t.split in ("val", "holdout")] or tasks
     pairs = replay_batch(backend, holdout, skill, memory)
@@ -52,7 +52,7 @@ def _score_holdout(backend, tasks: List[TaskRecord], skill: str, memory: str,
 def run(persona: str = "researcher", nights: int = 4, backend_name: str = "mock",
         edit_budget: int = 4, seed: int = 42, model: str = "", codex_path: str = "",
         limit_tasks: int = 0) -> dict:
-    from skillopt.sleep.mine import assign_splits
+    from skillopt_sleep.mine import assign_splits
 
     make = PERSONAS.get(persona, researcher_persona)
     items = make()

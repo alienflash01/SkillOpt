@@ -19,7 +19,7 @@ import json
 import os
 from typing import Any, Dict, Iterable, List, Optional
 
-from skillopt.sleep.types import SessionDigest
+from skillopt_sleep.types import SessionDigest
 
 
 # Heuristic phrases that signal the user (dis)approving of prior output.

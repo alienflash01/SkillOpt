@@ -18,7 +18,7 @@ held-out replay score, and nothing live is modified until the user adopts it.
 
 ## How to run it
 
-The engine is the `skillopt.sleep` Python package in this repo. Use the
+The engine is the `skillopt_sleep` Python package in this repo. Use the
 **plugin's bundled runner** so the right interpreter and repo are on the path:
 
 ```bash

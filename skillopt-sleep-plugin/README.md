@@ -48,7 +48,7 @@ cd SkillOpt
 ```
 
 The plugin's bundled runner (`scripts/sleep.sh`) auto-selects a Python ≥ 3.10
-interpreter and calls the `skillopt.sleep` engine in the repo. No `pip install`
+interpreter and calls the `skillopt_sleep` engine in the repo. No `pip install`
 is required for the default `mock` backend or for `claude`/`codex` backends —
 they shell out to the CLIs you already have.
 
@@ -65,9 +65,9 @@ they shell out to the CLIs you already have.
 Or call the engine directly (Python ≥ 3.10):
 
 ```bash
-python -m skillopt.sleep run --project "$(pwd)" --scope invoked --backend mock
-python -m skillopt.sleep run --project "$(pwd)" --backend claude   # real lift via Claude
-python -m skillopt.sleep run --project "$(pwd)" --backend codex    # real lift via Codex
+python -m skillopt_sleep run --project "$(pwd)" --scope invoked --backend mock
+python -m skillopt_sleep run --project "$(pwd)" --backend claude   # real lift via Claude
+python -m skillopt_sleep run --project "$(pwd)" --backend codex    # real lift via Codex
 ```
 
 Default backend is **`mock`** — deterministic, no API spend — so you can try the
@@ -98,10 +98,10 @@ Reproduce:
 
 ```bash
 git clone https://github.com/garrytan/gbrain-evals /tmp/gbrain-evals
-python -m skillopt.sleep.experiments.run_gbrain --backend claude --model haiku \
+python -m skillopt_sleep.experiments.run_gbrain --backend claude --model haiku \
   --seeds brief-writer --data-root /tmp/gbrain-evals/eval/data/skillopt-v1 \
   --nights 1 --limit-replay 3 --limit-holdout 3
-python -m skillopt.sleep.experiments.run_gbrain --backend codex \
+python -m skillopt_sleep.experiments.run_gbrain --backend codex \
   --seeds brief-writer --data-root /tmp/gbrain-evals/eval/data/skillopt-v1 \
   --nights 1 --limit-replay 3 --limit-holdout 3
 ```
@@ -109,8 +109,8 @@ python -m skillopt.sleep.experiments.run_gbrain --backend codex \
 ## Deterministic proof (no API, no keys)
 
 ```bash
-python -m skillopt.sleep.experiments.run_experiment --persona researcher --assert-improves
-python -m skillopt.sleep.experiments.run_experiment --persona programmer  --assert-improves
+python -m skillopt_sleep.experiments.run_experiment --persona researcher --assert-improves
+python -m skillopt_sleep.experiments.run_experiment --persona programmer  --assert-improves
 ```
 
 Each prints the held-out score rising from baseline toward 1.0 as the gate

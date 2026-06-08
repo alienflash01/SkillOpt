@@ -17,7 +17,7 @@ We map:
   judge           -> TaskRecord.judge (+ reference_kind="rule")
 
 This lets us reproduce gbrain's headline result with our engine and either the
-claude or codex backend, scoring locally via skillopt.sleep.judges (no judge API).
+claude or codex backend, scoring locally via skillopt_sleep.judges (no judge API).
 """
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ import json
 import os
 from typing import Dict, List, Optional, Tuple
 
-from skillopt.sleep.types import TaskRecord
+from skillopt_sleep.types import TaskRecord
 
 
 SEED_DIRS = {

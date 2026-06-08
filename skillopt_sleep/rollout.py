@@ -18,9 +18,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
 
-from skillopt.sleep.backend import Backend, _extract_json
-from skillopt.sleep.replay import replay_one
-from skillopt.sleep.types import EditRecord, ReplayResult, TaskRecord
+from skillopt_sleep.backend import Backend, _extract_json
+from skillopt_sleep.replay import replay_one
+from skillopt_sleep.types import EditRecord, ReplayResult, TaskRecord
 
 
 @dataclass

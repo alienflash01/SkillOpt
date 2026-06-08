@@ -10,7 +10,7 @@ from __future__ import annotations
 import re
 from typing import List, Tuple
 
-from skillopt.sleep.types import EditRecord
+from skillopt_sleep.types import EditRecord
 
 
 LEARNED_START = "<!-- SKILLOPT-SLEEP:LEARNED START -->"

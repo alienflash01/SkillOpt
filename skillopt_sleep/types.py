@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional
 class SessionDigest:
     """A normalized summary of one Claude Code session transcript.
 
-    Produced by :mod:`skillopt.sleep.harvest` from a ``<sessionId>.jsonl``
+    Produced by :mod:`skillopt_sleep.harvest` from a ``<sessionId>.jsonl``
     transcript plus ``history.jsonl`` entries.
     """
 

@@ -26,7 +26,7 @@ import re
 import subprocess
 from typing import Any, Dict, List, Optional, Tuple
 
-from skillopt.sleep.types import EditRecord, ReplayResult, TaskRecord
+from skillopt_sleep.types import EditRecord, ReplayResult, TaskRecord
 
 
 def skill_hash(content: str) -> str:
@@ -192,7 +192,7 @@ class MockBackend(Backend):
 
     def judge(self, task: TaskRecord, response: str) -> Tuple[float, float, str]:
         if task.reference_kind == "rule" and task.judge:
-            from skillopt.sleep.judges import score_rule_judge
+            from skillopt_sleep.judges import score_rule_judge
             return score_rule_judge(task.judge, response)
         if task.reference_kind == "exact" and task.reference:
             hard = exact_score(task.reference, response)
@@ -303,7 +303,7 @@ class CliBackend(Backend):
     def judge(self, task: TaskRecord, response: str) -> Tuple[float, float, str]:
         # gbrain-style rule judge: scored locally, no API spend
         if task.reference_kind == "rule" and task.judge:
-            from skillopt.sleep.judges import score_rule_judge
+            from skillopt_sleep.judges import score_rule_judge
             return score_rule_judge(task.judge, response)
         # exact references are scored locally — no API spend
         if task.reference_kind == "exact" and task.reference:

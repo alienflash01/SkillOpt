@@ -1,6 +1,6 @@
 ---
 name: skillopt-sleep
-description: "Use when the user wants their Claude agent to self-improve from past usage, asks about a nightly/offline 'sleep' or 'dream' cycle, memory/skill consolidation, or says things like '让 agent 越用越好用', 'review my past sessions', 'learn my preferences', 'consolidate what you learned', 'run the sleep cycle', or wants to schedule offline self-optimization. Drives the skillopt.sleep engine: harvest past sessions → mine recurring tasks → replay offline → consolidate validated CLAUDE.md/SKILL.md behind a held-out gate."
+description: "Use when the user wants their Claude agent to self-improve from past usage, asks about a nightly/offline 'sleep' or 'dream' cycle, memory/skill consolidation, or says things like '让 agent 越用越好用', 'review my past sessions', 'learn my preferences', 'consolidate what you learned', 'run the sleep cycle', or wants to schedule offline self-optimization. Drives the skillopt_sleep engine: harvest past sessions → mine recurring tasks → replay offline → consolidate validated CLAUDE.md/SKILL.md behind a held-out gate."
 ---
 
 # SkillOpt-Sleep: offline self-evolution for a local Claude agent
@@ -62,7 +62,7 @@ Prefer the `/sleep` command. Under the hood it calls the bundled runner:
 - Always show the user the **held-out baseline → candidate** score and the
   exact proposed edits before suggesting adoption. Evidence before adoption.
 - If asked whether it really helps, run
-  `python -m skillopt.sleep.experiments.run_experiment --persona researcher --json`
+  `python -m skillopt_sleep.experiments.run_experiment --persona researcher --json`
   — a deterministic demo that proves held-out lift and that the gate blocks
   harmful edits.
 
@@ -70,8 +70,8 @@ Prefer the `/sleep` command. Under the hood it calls the bundled runner:
 
 ```bash
 # deterministic proof (no API): held-out score rises, gate blocks regressions
-python -m skillopt.sleep.experiments.run_experiment --persona researcher --assert-improves
-python -m skillopt.sleep.experiments.run_experiment --persona programmer  --assert-improves
+python -m skillopt_sleep.experiments.run_experiment --persona researcher --assert-improves
+python -m skillopt_sleep.experiments.run_experiment --persona programmer  --assert-improves
 ```
 
 See `docs/sleep/experiment_results.md` for recorded output and

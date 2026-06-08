@@ -11,8 +11,8 @@ from __future__ import annotations
 
 from typing import List, Tuple
 
-from skillopt.sleep.backend import Backend
-from skillopt.sleep.types import ReplayResult, TaskRecord
+from skillopt_sleep.backend import Backend
+from skillopt_sleep.types import ReplayResult, TaskRecord
 
 
 def _required_tools(task: TaskRecord) -> List[str]:
@@ -44,7 +44,7 @@ def replay_one(backend: Backend, task: TaskRecord, skill: str, memory: str) -> R
 
     # rule judges may need the detected tool calls; score locally when possible
     if task.reference_kind == "rule" and task.judge:
-        from skillopt.sleep.judges import score_rule_judge
+        from skillopt_sleep.judges import score_rule_judge
         hard, soft, rationale = score_rule_judge(task.judge, response, tools_called)
     else:
         hard, soft, rationale = backend.judge(task, response)

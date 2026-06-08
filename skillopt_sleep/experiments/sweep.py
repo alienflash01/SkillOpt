@@ -8,8 +8,8 @@ survive) and resume (skip configs whose row already exists).
 Then `report.py` turns the JSONL into a presented Markdown scorecard.
 
 Usage:
-  python -m skillopt.sleep.experiments.sweep --plan quick   --out docs/sleep/sweep.jsonl
-  python -m skillopt.sleep.experiments.sweep --plan full    --out docs/sleep/sweep.jsonl
+  python -m skillopt_sleep.experiments.sweep --plan quick   --out docs/sleep/sweep.jsonl
+  python -m skillopt_sleep.experiments.sweep --plan full    --out docs/sleep/sweep.jsonl
 """
 from __future__ import annotations
 
@@ -20,10 +20,10 @@ import sys
 import time
 from typing import Any, Dict, List
 
-from skillopt.sleep.backend import build_backend, get_backend
-from skillopt.sleep.experiments.gbrain_bench import find_data_root, load_seed
-from skillopt.sleep.experiments.run_gbrain import run_seed as bench_seed
-from skillopt.sleep.experiments.run_transfer import run_seed as transfer_seed
+from skillopt_sleep.backend import build_backend, get_backend
+from skillopt_sleep.experiments.gbrain_bench import find_data_root, load_seed
+from skillopt_sleep.experiments.run_gbrain import run_seed as bench_seed
+from skillopt_sleep.experiments.run_transfer import run_seed as transfer_seed
 
 
 # Plans: lists of config dicts. Kept small per-run to bound cost/latency.

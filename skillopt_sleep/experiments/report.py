@@ -1,7 +1,7 @@
 """SkillOpt-Sleep — turn a sweep JSONL into a presented Markdown scorecard.
 
 Usage:
-  python -m skillopt.sleep.experiments.report --in docs/sleep/sweep.jsonl \
+  python -m skillopt_sleep.experiments.report --in docs/sleep/sweep.jsonl \
       --out docs/sleep/benchmark_report.md
 """
 from __future__ import annotations
@@ -101,9 +101,9 @@ def render(rows: List[Dict[str, Any]]) -> str:
     out.append("")
     out.append("```bash")
     out.append("git clone https://github.com/garrytan/gbrain-evals /tmp/gbrain-evals")
-    out.append("python -m skillopt.sleep.experiments.sweep --plan full \\")
+    out.append("python -m skillopt_sleep.experiments.sweep --plan full \\")
     out.append("    --data-root /tmp/gbrain-evals/eval/data/skillopt-v1 --out docs/sleep/sweep.jsonl")
-    out.append("python -m skillopt.sleep.experiments.report \\")
+    out.append("python -m skillopt_sleep.experiments.report \\")
     out.append("    --in docs/sleep/sweep.jsonl --out docs/sleep/benchmark_report.md")
     out.append("```")
     out.append("")

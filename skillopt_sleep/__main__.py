@@ -1,10 +1,10 @@
 """SkillOpt-Sleep — command-line interface.
 
-    python -m skillopt.sleep run        # full cycle: harvest->mine->replay->gate->stage
-    python -m skillopt.sleep dry-run    # same but report only, no staging/adopt
-    python -m skillopt.sleep status     # show state + latest staged proposal
-    python -m skillopt.sleep adopt      # apply the latest staged proposal (with backup)
-    python -m skillopt.sleep harvest    # just print what would be mined (debug)
+    python -m skillopt_sleep run        # full cycle: harvest->mine->replay->gate->stage
+    python -m skillopt_sleep dry-run    # same but report only, no staging/adopt
+    python -m skillopt_sleep status     # show state + latest staged proposal
+    python -m skillopt_sleep adopt      # apply the latest staged proposal (with backup)
+    python -m skillopt_sleep harvest    # just print what would be mined (debug)
 
 Common flags:
     --project PATH      project to evolve (default: cwd)
@@ -23,12 +23,12 @@ import os
 import sys
 from typing import Any, Dict
 
-from skillopt.sleep.config import load_config
-from skillopt.sleep.cycle import run_sleep_cycle
-from skillopt.sleep.harvest import harvest
-from skillopt.sleep.mine import mine
-from skillopt.sleep.state import SleepState
-from skillopt.sleep.staging import latest_staging, adopt as adopt_staging
+from skillopt_sleep.config import load_config
+from skillopt_sleep.cycle import run_sleep_cycle
+from skillopt_sleep.harvest import harvest
+from skillopt_sleep.mine import mine
+from skillopt_sleep.state import SleepState
+from skillopt_sleep.staging import latest_staging, adopt as adopt_staging
 
 
 def _add_common(p: argparse.ArgumentParser) -> None:
@@ -90,7 +90,7 @@ def cmd_run(args, dry: bool = False) -> int:
         if outcome.staging_dir:
             print(f"[sleep] staged: {outcome.staging_dir}")
             if not outcome.adopted:
-                print("[sleep] review it, then: python -m skillopt.sleep adopt")
+                print("[sleep] review it, then: python -m skillopt_sleep adopt")
         if outcome.adopted:
             print(f"[sleep] auto-adopted: {', '.join(outcome.adopted_paths)}")
     return 0
@@ -164,7 +164,7 @@ def cmd_harvest(args) -> int:
 
 
 def main(argv=None) -> int:
-    parser = argparse.ArgumentParser(prog="skillopt.sleep", description="SkillOpt-Sleep nightly self-evolution")
+    parser = argparse.ArgumentParser(prog="skillopt_sleep", description="SkillOpt-Sleep nightly self-evolution")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p_run = sub.add_parser("run", help="run a full sleep cycle")

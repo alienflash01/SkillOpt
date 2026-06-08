@@ -23,8 +23,8 @@ from __future__ import annotations
 import re
 from typing import List, Optional, Tuple
 
-from skillopt.sleep.backend import Backend, _extract_json
-from skillopt.sleep.types import ReplayResult, TaskRecord
+from skillopt_sleep.backend import Backend, _extract_json
+from skillopt_sleep.types import ReplayResult, TaskRecord
 
 
 SLOW_UPDATE_START = "<!-- SLOW_UPDATE_START -->"

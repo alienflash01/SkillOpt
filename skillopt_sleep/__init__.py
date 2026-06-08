@@ -11,8 +11,8 @@ Synthesizes three ideas:
   * Sleep     — short-term experience -> long-term competence, offline
 
 Public entry points:
-  * skillopt.sleep.cli      — `python -m skillopt.sleep ...`
-  * skillopt.sleep.cycle.run_sleep_cycle(...)
+  * skillopt_sleep.cli      — `python -m skillopt_sleep ...`
+  * skillopt_sleep.cycle.run_sleep_cycle(...)
 """
 from __future__ import annotations
 

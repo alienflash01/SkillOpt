@@ -13,7 +13,7 @@ import shutil
 import time
 from typing import List, Optional
 
-from skillopt.sleep.types import SleepReport
+from skillopt_sleep.types import SleepReport
 
 
 def _ts_dir() -> str:

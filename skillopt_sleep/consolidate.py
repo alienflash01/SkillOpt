@@ -3,11 +3,8 @@
 This is the core that makes nightly evolution *safe*: it proposes bounded
 edits from replayed failures, applies them to a candidate skill/memory, then
 **gates** the candidate on a held-out slice of the user's own tasks. Only a
-candidate that strictly improves the held-out score is accepted — exactly the
-SkillOpt validation gate, reused verbatim from ``skillopt.evaluation.gate``.
-
-Reused from the main SkillOpt package (import-light, no `openai` needed):
-  * skillopt.evaluation.gate.evaluate_gate / select_gate_score
+candidate that strictly improves the held-out score is accepted — the SkillOpt
+validation gate, vendored self-contained in ``skillopt_sleep.gate``.
 """
 from __future__ import annotations
 
@@ -15,26 +12,16 @@ import os
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
-from skillopt.sleep.backend import Backend
-from skillopt.sleep.memory import apply_edits
-from skillopt.sleep.replay import aggregate_scores, replay_batch
-from skillopt.sleep.types import EditRecord, ReplayResult, TaskRecord
+from skillopt_sleep.backend import Backend
+from skillopt_sleep.memory import apply_edits
+from skillopt_sleep.replay import aggregate_scores, replay_batch
+from skillopt_sleep.types import EditRecord, ReplayResult, TaskRecord
 
 
-# Reuse the real SkillOpt gate. This module imports cleanly without `openai`.
-try:
-    from skillopt.evaluation.gate import evaluate_gate, select_gate_score
-    _HAVE_REPO_GATE = True
-except Exception:  # pragma: no cover - fallback keeps engine standalone
-    _HAVE_REPO_GATE = False
-
-    def select_gate_score(hard, soft, metric="hard", mixed_weight=0.5):  # type: ignore
-        if metric == "hard":
-            return float(hard)
-        if metric == "soft":
-            return float(soft)
-        w = max(0.0, min(1.0, float(mixed_weight)))
-        return (1 - w) * float(hard) + w * float(soft)
+# Self-contained validation gate (vendored from SkillOpt; zero dependency on the
+# research package, so this open-source tool stays decoupled from the paper code).
+from skillopt_sleep.gate import evaluate_gate, select_gate_score
+_HAVE_REPO_GATE = True
 
 
 @dataclass
@@ -140,7 +127,7 @@ def consolidate(
         if rollouts_k > 1:
             # multi-rollout contrastive reflection: run each train task K times
             # and distill a rule from the good-vs-bad contrast (the "脑补" signal).
-            from skillopt.sleep.rollout import multi_rollout, contrastive_reflect
+            from skillopt_sleep.rollout import multi_rollout, contrastive_reflect
             sets = [multi_rollout(backend, t, cand_skill, cand_memory, k=rollouts_k)
                     for t in train_tasks]
             edits = contrastive_reflect(

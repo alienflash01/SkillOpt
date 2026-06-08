@@ -22,8 +22,8 @@ import json
 import re
 from typing import Any, Callable, Dict, List
 
-from skillopt.sleep.backend import Backend, _extract_json
-from skillopt.sleep.types import SessionDigest, TaskRecord
+from skillopt_sleep.backend import Backend, _extract_json
+from skillopt_sleep.types import SessionDigest, TaskRecord
 
 
 _MINER_PROMPT = """You are mining a user's past AI-assistant sessions to find RECURRING tasks

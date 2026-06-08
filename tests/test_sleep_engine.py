@@ -2,7 +2,7 @@
 
 Pure-stdlib (unittest), deterministic, no API key, no third-party deps.
 Run:  python3.12 -m pytest tests/test_sleep_engine.py
-  or: python3.12 -m unittest skillopt.sleep ... (see bottom)
+  or: python3.12 -m unittest skillopt_sleep ... (see bottom)
 """
 from __future__ import annotations
 
@@ -11,16 +11,16 @@ import os
 import tempfile
 import unittest
 
-from skillopt.sleep.backend import MockBackend, exact_score, keyword_soft_score
-from skillopt.sleep.config import load_config
-from skillopt.sleep.consolidate import consolidate
-from skillopt.sleep.cycle import run_sleep_cycle
-from skillopt.sleep.experiments.personas import researcher_persona, programmer_persona
-from skillopt.sleep.harvest import digest_transcript, _detect_feedback, _is_meta_prompt
-from skillopt.sleep.memory import apply_edits, current_learned_lines, extract_learned, set_learned
-from skillopt.sleep.mine import assign_splits, heuristic_mine, dedup_tasks
-from skillopt.sleep.staging import adopt, latest_staging
-from skillopt.sleep.types import EditRecord, SessionDigest, TaskRecord
+from skillopt_sleep.backend import MockBackend, exact_score, keyword_soft_score
+from skillopt_sleep.config import load_config
+from skillopt_sleep.consolidate import consolidate
+from skillopt_sleep.cycle import run_sleep_cycle
+from skillopt_sleep.experiments.personas import researcher_persona, programmer_persona
+from skillopt_sleep.harvest import digest_transcript, _detect_feedback, _is_meta_prompt
+from skillopt_sleep.memory import apply_edits, current_learned_lines, extract_learned, set_learned
+from skillopt_sleep.mine import assign_splits, heuristic_mine, dedup_tasks
+from skillopt_sleep.staging import adopt, latest_staging
+from skillopt_sleep.types import EditRecord, SessionDigest, TaskRecord
 
 
 class TestScoring(unittest.TestCase):
@@ -115,7 +115,7 @@ class TestMine(unittest.TestCase):
 
     def test_dream_never_in_val_or_test(self):
         # the anti-overfitting guarantee: origin='dream' tasks only ever land in train
-        from skillopt.sleep.types import TaskRecord
+        from skillopt_sleep.types import TaskRecord
         real = researcher_persona()
         dream = [TaskRecord(id=f"d{i}", project="/p", intent=f"dream {i}",
                             origin="dream", derived_from="r0") for i in range(5)]
@@ -152,7 +152,7 @@ class TestConsolidateGate(unittest.TestCase):
 
 class TestRuleJudge(unittest.TestCase):
     def test_section_and_regex(self):
-        from skillopt.sleep.judges import score_rule_judge
+        from skillopt_sleep.judges import score_rule_judge
         j = {"kind": "rule", "checks": [
             {"op": "section_present", "arg": "Key Risks"},
             {"op": "regex", "arg": r"[Cc]onfidence\s*[:=]"},
@@ -162,13 +162,13 @@ class TestRuleJudge(unittest.TestCase):
         self.assertEqual(score_rule_judge(j, "just an answer")[0], 0.0)
 
     def test_max_chars(self):
-        from skillopt.sleep.judges import score_rule_judge
+        from skillopt_sleep.judges import score_rule_judge
         j = {"checks": [{"op": "max_chars", "arg": 50}]}
         self.assertEqual(score_rule_judge(j, "x" * 10)[0], 1.0)
         self.assertEqual(score_rule_judge(j, "x" * 100)[0], 0.0)
 
     def test_partial_soft_score(self):
-        from skillopt.sleep.judges import score_rule_judge
+        from skillopt_sleep.judges import score_rule_judge
         j = {"checks": [
             {"op": "contains", "arg": "alpha"},
             {"op": "contains", "arg": "beta"},
@@ -180,7 +180,7 @@ class TestRuleJudge(unittest.TestCase):
 
 class TestGbrainLoader(unittest.TestCase):
     def test_loads_when_present(self):
-        from skillopt.sleep.experiments.gbrain_bench import find_data_root, load_seed
+        from skillopt_sleep.experiments.gbrain_bench import find_data_root, load_seed
         root = find_data_root()
         if not root:
             self.skipTest("gbrain-evals data not present")
@@ -191,7 +191,7 @@ class TestGbrainLoader(unittest.TestCase):
         self.assertTrue(any(t.split == "val" for t in tasks))
         self.assertTrue(all(t.reference_kind == "rule" for t in tasks))
         # the deficient skill must FAIL its own held-out (test) checks (baseline 0)
-        from skillopt.sleep.judges import score_rule_judge
+        from skillopt_sleep.judges import score_rule_judge
         ho = [t for t in tasks if t.split == "test"][0]
         self.assertEqual(score_rule_judge(ho.judge, skill)[0], 0.0)
 
@@ -199,8 +199,8 @@ class TestGbrainLoader(unittest.TestCase):
 class TestLlmMiner(unittest.TestCase):
     def test_miner_emits_checkable_tasks(self):
         # a stub backend whose _call returns canned miner JSON => deterministic
-        from skillopt.sleep.backend import Backend
-        from skillopt.sleep.llm_miner import make_llm_miner
+        from skillopt_sleep.backend import Backend
+        from skillopt_sleep.llm_miner import make_llm_miner
 
         class StubBackend(Backend):
             name = "stub"
@@ -219,8 +219,8 @@ class TestLlmMiner(unittest.TestCase):
         self.assertEqual(tasks[0].judge["checks"][0]["op"], "section_present")
 
     def test_miner_drops_uncheckable(self):
-        from skillopt.sleep.backend import Backend
-        from skillopt.sleep.llm_miner import make_llm_miner
+        from skillopt_sleep.backend import Backend
+        from skillopt_sleep.llm_miner import make_llm_miner
 
         class EmptyBackend(Backend):
             name = "stub"
@@ -234,8 +234,8 @@ class TestLlmMiner(unittest.TestCase):
 
 class TestMultiObjectiveAndPrefs(unittest.TestCase):
     def test_multi_objective_reward(self):
-        from skillopt.sleep.replay import multi_objective_reward
-        from skillopt.sleep.types import ReplayResult, TaskRecord
+        from skillopt_sleep.replay import multi_objective_reward
+        from skillopt_sleep.types import ReplayResult, TaskRecord
         t = TaskRecord(id="t", project="/p", intent="x")
         expensive = [(t, ReplayResult(id="t", hard=1.0, tokens=4000, latency_ms=20000))]
         cheap = [(t, ReplayResult(id="t", hard=1.0, tokens=200, latency_ms=1000))]
@@ -248,8 +248,8 @@ class TestMultiObjectiveAndPrefs(unittest.TestCase):
         self.assertGreater(rc, re)
 
     def test_preferences_injected_into_reflect(self):
-        from skillopt.sleep.backend import CliBackend
-        from skillopt.sleep.types import TaskRecord, ReplayResult
+        from skillopt_sleep.backend import CliBackend
+        from skillopt_sleep.types import TaskRecord, ReplayResult
         captured = {}
 
         class CapBackend(CliBackend):
@@ -267,9 +267,9 @@ class TestMultiObjectiveAndPrefs(unittest.TestCase):
         self.assertIn("British English", captured["prompt"])
 
     def test_replay_records_cost(self):
-        from skillopt.sleep.backend import MockBackend
-        from skillopt.sleep.replay import replay_one
-        from skillopt.sleep.types import TaskRecord
+        from skillopt_sleep.backend import MockBackend
+        from skillopt_sleep.replay import replay_one
+        from skillopt_sleep.types import TaskRecord
         t = TaskRecord(id="t", project="/p", intent="hello world",
                        reference_kind="exact", reference="hi")
         r = replay_one(MockBackend(), t, "some skill text", "")
@@ -279,8 +279,8 @@ class TestMultiObjectiveAndPrefs(unittest.TestCase):
 
 class TestMultiRolloutAndBudget(unittest.TestCase):
     def test_rolloutset_stats(self):
-        from skillopt.sleep.rollout import RolloutSet
-        from skillopt.sleep.types import ReplayResult, TaskRecord
+        from skillopt_sleep.rollout import RolloutSet
+        from skillopt_sleep.types import ReplayResult, TaskRecord
         rs = RolloutSet(task=TaskRecord(id="t", project="/p", intent="x"),
                         attempts=[ReplayResult(id="t", hard=1.0),
                                   ReplayResult(id="t", hard=0.0),
@@ -291,7 +291,7 @@ class TestMultiRolloutAndBudget(unittest.TestCase):
         self.assertAlmostEqual(rs.pass_rate, 2 / 3)
 
     def test_budget_exhaustion_and_plan(self):
-        from skillopt.sleep.budget import Budget, plan_depth
+        from skillopt_sleep.budget import Budget, plan_depth
         clock = [0.0]
         b = Budget(max_tokens=1000)
         b.start(lambda: clock[0], tokens_now=0)
@@ -303,9 +303,9 @@ class TestMultiRolloutAndBudget(unittest.TestCase):
         self.assertGreaterEqual(k, 1)
 
     def test_contrastive_reflect_with_stub(self):
-        from skillopt.sleep.backend import Backend
-        from skillopt.sleep.rollout import RolloutSet, contrastive_reflect
-        from skillopt.sleep.types import ReplayResult, TaskRecord
+        from skillopt_sleep.backend import Backend
+        from skillopt_sleep.rollout import RolloutSet, contrastive_reflect
+        from skillopt_sleep.types import ReplayResult, TaskRecord
 
         class StubBackend(Backend):
             name = "stub"
@@ -322,7 +322,7 @@ class TestMultiRolloutAndBudget(unittest.TestCase):
 
 class TestSlowUpdate(unittest.TestCase):
     def test_protected_field_roundtrip(self):
-        from skillopt.sleep.slow_update import (
+        from skillopt_sleep.slow_update import (
             replace_slow_field, extract_slow_field, has_slow_field,
             SLOW_UPDATE_START, SLOW_UPDATE_END,
         )
@@ -339,9 +339,9 @@ class TestSlowUpdate(unittest.TestCase):
         self.assertIn("keep me", doc2)
 
     def test_run_slow_update_with_stub_backend(self):
-        from skillopt.sleep.backend import Backend
-        from skillopt.sleep.slow_update import run_slow_update
-        from skillopt.sleep.types import TaskRecord, ReplayResult
+        from skillopt_sleep.backend import Backend
+        from skillopt_sleep.slow_update import run_slow_update
+        from skillopt_sleep.types import TaskRecord, ReplayResult
 
         class StubBackend(Backend):
             name = "stub"
@@ -365,10 +365,10 @@ class TestSlowUpdate(unittest.TestCase):
 
 class TestToolLoop(unittest.TestCase):
     def test_tool_called_judge_via_replay(self):
-        from skillopt.sleep.backend import MockBackend
-        from skillopt.sleep.replay import replay_one, _required_tools
-        from skillopt.sleep.memory import set_learned
-        from skillopt.sleep.types import TaskRecord
+        from skillopt_sleep.backend import MockBackend
+        from skillopt_sleep.replay import replay_one, _required_tools
+        from skillopt_sleep.memory import set_learned
+        from skillopt_sleep.types import TaskRecord
 
         task = TaskRecord(
             id="qa1", project="/p", intent="answer the question",

@@ -16,7 +16,7 @@ Protocol, per gbrain seed:
 Report baseline / direct / transferred, mirroring SkillOpt Table "transfer".
 
 Usage:
-  python -m skillopt.sleep.experiments.run_transfer \
+  python -m skillopt_sleep.experiments.run_transfer \
      --source-backend claude --source-model haiku \
      --target-backend claude --target-model sonnet \
      --seeds brief-writer --nights 2
@@ -28,12 +28,12 @@ import json
 import sys
 from typing import List, Optional
 
-from skillopt.sleep.backend import get_backend
-from skillopt.sleep.consolidate import consolidate, select_gate_score
-from skillopt.sleep.experiments.gbrain_bench import (
+from skillopt_sleep.backend import get_backend
+from skillopt_sleep.consolidate import consolidate, select_gate_score
+from skillopt_sleep.experiments.gbrain_bench import (
     available_seeds, find_data_root, load_seed,
 )
-from skillopt.sleep.replay import aggregate_scores, replay_batch
+from skillopt_sleep.replay import aggregate_scores, replay_batch
 
 
 def _holdout_hard(backend, tasks, skill, memory="") -> float:

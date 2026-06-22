@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import sqlite3
 import tempfile
 import unittest
 from unittest import mock
@@ -179,6 +180,156 @@ class TestHarvest(unittest.TestCase):
         self.assertEqual(cfg.get("transcript_source"), "codex")
         self.assertEqual(len(digests), 1)
         self.assertEqual(digests[0].session_id, "rollout-yoshi")
+        self.assertEqual(digests[0].user_prompts, ["fix Yoshi"])
+
+    def _build_opencode_db(self, home):
+        """Create a minimal opencode.db under `home` and return its path."""
+        import sqlite3
+
+        os.makedirs(home, exist_ok=True)
+        db_path = os.path.join(home, "opencode.db")
+        con = sqlite3.connect(db_path)
+        con.executescript(
+            """
+            CREATE TABLE session (
+                id TEXT PRIMARY KEY, directory TEXT, title TEXT,
+                time_created INTEGER, time_updated INTEGER, summary_diffs TEXT
+            );
+            CREATE TABLE message (
+                id TEXT PRIMARY KEY, session_id TEXT, time_created INTEGER, data TEXT
+            );
+            CREATE TABLE part (
+                id TEXT PRIMARY KEY, message_id TEXT, session_id TEXT,
+                time_created INTEGER, data TEXT
+            );
+            """
+        )
+        return con
+
+    def _oc_msg(self, con, msg_id, session_id, role, t):
+        con.execute(
+            "INSERT INTO message(id, session_id, time_created, data) VALUES (?,?,?,?)",
+            (msg_id, session_id, t, json.dumps({"role": role})),
+        )
+
+    def _oc_part(self, con, part_id, msg_id, session_id, t, data):
+        con.execute(
+            "INSERT INTO part(id, message_id, session_id, time_created, data) VALUES (?,?,?,?,?)",
+            (part_id, msg_id, session_id, t, json.dumps(data)),
+        )
+
+    def test_digest_opencode_session_extracts_content_and_redacts(self):
+        from skillopt_sleep.harvest_opencode import digest_opencode_session, harvest_opencode
+
+        with tempfile.TemporaryDirectory() as tmp:
+            home = os.path.join(tmp, "opencode")
+            con = self._build_opencode_db(home)
+            # session in /repo/Yoshi
+            con.execute(
+                "INSERT INTO session(id, directory, title, time_created, time_updated) "
+                "VALUES (?,?,?,?,?)",
+                ("ses_yoshi", "/repo/Yoshi", "Yoshi work", 1782000000000, 1782000060000),
+            )
+            # user message + text part (with a secret that must be redacted)
+            self._oc_msg(con, "msg_u1", "ses_yoshi", "user", 1782000010000)
+            self._oc_part(con, "prt_u1", "msg_u1", "ses_yoshi", 1782000010000,
+                          {"type": "text", "text": "deploy with sk-1234567890abcdef"})
+            # assistant message: a tool part (edit) + a text part
+            self._oc_msg(con, "msg_a1", "ses_yoshi", "assistant", 1782000020000)
+            self._oc_part(con, "prt_tool", "msg_a1", "ses_yoshi", 1782000020000,
+                          {"type": "tool", "tool": "edit",
+                           "state": {"status": "completed",
+                                     "input": {"filePath": "/repo/Yoshi/deploy.sh"}}})
+            self._oc_part(con, "prt_txt", "msg_a1", "ses_yoshi", 1782000030000,
+                          {"type": "text", "text": "done"})
+            # a patch part touching another file
+            self._oc_part(con, "prt_patch", "msg_a1", "ses_yoshi", 1782000040000,
+                          {"type": "patch", "hash": "abc",
+                           "files": ["/repo/Yoshi/README.md"]})
+            con.commit()
+            con.close()
+
+            con2 = sqlite3.connect(os.path.join(home, "opencode.db"))
+            try:
+                digest = digest_opencode_session(con2, "ses_yoshi", project="/repo/Yoshi")
+            finally:
+                con2.close()
+
+            self.assertIsNotNone(digest)
+            self.assertEqual(digest.project, "/repo/Yoshi")
+            self.assertIn("[REDACTED_OPENAI_KEY]", "".join(digest.user_prompts))
+            self.assertEqual(digest.user_prompts, ["deploy with [REDACTED_OPENAI_KEY]"])
+            self.assertEqual(digest.assistant_finals, ["done"])
+            self.assertIn("edit", digest.tools_used)
+            self.assertIn("/repo/Yoshi/deploy.sh", digest.files_touched)
+            self.assertIn("/repo/Yoshi/README.md", digest.files_touched)
+            self.assertEqual(digest.n_user_turns, 1)
+            self.assertEqual(digest.n_assistant_turns, 1)
+            self.assertTrue(digest.started_at.startswith("20") and digest.started_at.endswith("Z"))
+            self.assertGreaterEqual(digest.ended_at, digest.started_at)
+
+            # project filter: invoked project mismatch -> None
+            con3 = sqlite3.connect(os.path.join(home, "opencode.db"))
+            try:
+                none_digest = digest_opencode_session(con3, "ses_yoshi", project="/repo/Other")
+            finally:
+                con3.close()
+            self.assertIsNone(none_digest)
+
+            # harvest_opencode returns the one session
+            digests = harvest_opencode(os.path.join(home, "opencode.db"), scope="all", limit=10)
+            self.assertEqual(len(digests), 1)
+            self.assertEqual(digests[0].session_id, "ses_yoshi")
+
+    def test_harvest_opencode_filters_project_and_cli_source(self):
+        from skillopt_sleep.__main__ import _cfg_from_args
+        from skillopt_sleep.harvest_sources import harvest_for_config
+
+        with tempfile.TemporaryDirectory() as tmp:
+            home = os.path.join(tmp, "opencode")
+            con = self._build_opencode_db(home)
+            # session 1: /repo/Yoshi
+            con.execute(
+                "INSERT INTO session(id, directory, title, time_created, time_updated) "
+                "VALUES (?,?,?,?,?)",
+                ("ses_yoshi", "/repo/Yoshi", "y", 1782000010000, 1782000020000),
+            )
+            self._oc_msg(con, "m_yu", "ses_yoshi", "user", 1782000010000)
+            self._oc_part(con, "p_yu", "m_yu", "ses_yoshi", 1782000010000,
+                          {"type": "text", "text": "fix Yoshi"})
+            # session 2: /repo/Other
+            con.execute(
+                "INSERT INTO session(id, directory, title, time_created, time_updated) "
+                "VALUES (?,?,?,?,?)",
+                ("ses_other", "/repo/Other", "o", 1782000030000, 1782000040000),
+            )
+            self._oc_msg(con, "m_ou", "ses_other", "user", 1782000030000)
+            self._oc_part(con, "p_ou", "m_ou", "ses_other", 1782000030000,
+                          {"type": "text", "text": "fix Other"})
+            con.commit()
+            con.close()
+
+            Args = type("Args", (), {
+                "project": "/repo/Yoshi",
+                "scope": "",
+                "backend": "",
+                "model": "",
+                "codex_path": "",
+                "claude_home": "",
+                "codex_home": "",
+                "opencode_home": home,
+                "source": "opencode",
+                "lookback_hours": 0,
+                "edit_budget": 0,
+                "auto_adopt": False,
+            })
+
+            cfg = _cfg_from_args(Args())
+            digests = harvest_for_config(cfg, limit=10)
+
+        self.assertEqual(cfg.get("transcript_source"), "opencode")
+        self.assertEqual(len(digests), 1)
+        self.assertEqual(digests[0].session_id, "ses_yoshi")
         self.assertEqual(digests[0].user_prompts, ["fix Yoshi"])
 
     def test_cli_exposes_limits_progress_and_target_skill_path(self):

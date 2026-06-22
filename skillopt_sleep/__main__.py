@@ -14,7 +14,7 @@ Common flags:
     --target-skill-path PATH explicit live SKILL.md to stage/adopt
     --tasks-file PATH   reviewed TaskRecord JSON file to replay instead of harvesting
     --backend mock|claude|codex|copilot
-    --source claude|codex|auto
+    --source claude|codex|opencode|auto
     --model NAME
     --lookback-hours N
     --auto-adopt
@@ -74,7 +74,9 @@ def _add_common(p: argparse.ArgumentParser) -> None:
     p.add_argument("--codex-path", default="", help="path to the real @openai/codex binary")
     p.add_argument("--claude-home", default="", help="override ~/.claude (also isolates state)")
     p.add_argument("--codex-home", default="", help="override ~/.codex for archived session harvest")
-    p.add_argument("--source", default="", choices=["", "claude", "codex", "auto"],
+    p.add_argument("--opencode-home", default="",
+                   help="override ~/.local/share/opencode (where opencode.db lives)")
+    p.add_argument("--source", default="", choices=["", "claude", "codex", "opencode", "auto"],
                    help="session transcript source")
     p.add_argument("--lookback-hours", type=int, default=None,
                    help="harvest window in hours; 0 = scan full history")
@@ -110,6 +112,8 @@ def _cfg_from_args(args, task_meta: Dict[str, Any] | None = None) -> Any:
         overrides["claude_home"] = os.path.abspath(args.claude_home)
     if getattr(args, "codex_home", ""):
         overrides["codex_home"] = os.path.abspath(args.codex_home)
+    if getattr(args, "opencode_home", ""):
+        overrides["opencode_home"] = os.path.abspath(args.opencode_home)
     if getattr(args, "source", ""):
         overrides["transcript_source"] = args.source
     lh = getattr(args, "lookback_hours", None)

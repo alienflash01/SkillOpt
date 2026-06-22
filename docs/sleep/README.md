@@ -17,7 +17,7 @@ review. The agent gets better the more you use it, with **no weight training** a
 One "night":
 
 ```
-harvest Claude Code / Codex transcripts → mine recurring tasks → replay offline
+harvest Claude Code / Codex / opencode transcripts → mine recurring tasks → replay offline
    → consolidate (reflect → bounded edit → GATE on real held-out tasks)
    → stage proposal → (you) adopt
 ```
@@ -34,6 +34,7 @@ One engine, thin per-agent shells (see [`plugins/`](../../plugins)):
 |---|---|---|
 | **Claude Code** | [`plugins/claude-code`](../../plugins/claude-code) | `/plugin marketplace add ./plugins/claude-code` → `/skillopt-sleep` |
 | **Codex** | [`plugins/codex`](../../plugins/codex) | `bash plugins/codex/install.sh` → `skillopt-sleep` skill |
+| **opencode** | [`plugins/opencode`](../../plugins/opencode) | `bash plugins/opencode/install.sh` → `skillopt-sleep` skill |
 | **Copilot** | [`plugins/copilot`](../../plugins/copilot) | register `plugins/copilot/mcp_server.py` as an MCP server |
 
 Deterministic proof (no API key):

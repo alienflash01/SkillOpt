@@ -19,13 +19,15 @@ from typing import Any, Dict, Optional
 HOME_STATE_DIR = os.path.expanduser("~/.skillopt-sleep")
 CLAUDE_HOME = os.path.expanduser("~/.claude")
 CODEX_HOME = os.path.expanduser("~/.codex")
+OPENCODE_HOME = os.path.expanduser("~/.local/share/opencode")
 
 
 DEFAULTS: Dict[str, Any] = {
     # ── scope ──────────────────────────────────────────────────────────────
     "claude_home": CLAUDE_HOME,
     "codex_home": CODEX_HOME,
-    "transcript_source": "claude",  # "claude" | "codex" | "auto"
+    "opencode_home": OPENCODE_HOME,
+    "transcript_source": "claude",  # "claude" | "codex" | "opencode" | "auto"
     "projects": "invoked",        # "invoked" | "all" | [list of abs paths]
     "invoked_project": "",        # filled at runtime (cwd) when projects == "invoked"
     "lookback_hours": 72,         # harvest window when no prior sleep recorded
@@ -106,6 +108,10 @@ class SleepConfig:
     @property
     def codex_archived_sessions_dir(self) -> str:
         return os.path.join(self.data["codex_home"], "archived_sessions")
+
+    @property
+    def opencode_db_path(self) -> str:
+        return os.path.join(self.data["opencode_home"], "opencode.db")
 
     @property
     def history_path(self) -> str:
